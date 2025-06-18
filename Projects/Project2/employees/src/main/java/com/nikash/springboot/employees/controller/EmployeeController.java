@@ -1,6 +1,5 @@
 package com.nikash.springboot.employees.controller;
 
-import com.nikash.springboot.employees.dao.EmployeeDao;
 import com.nikash.springboot.employees.entity.Employee;
 import com.nikash.springboot.employees.request.EmployeeRequest;
 import com.nikash.springboot.employees.service.EmployeeService;
