@@ -11,32 +11,36 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class SecurityConfig {
 
+    //add support for JDBC ... no more hardcoded users :-)
     @Bean
-    public InMemoryUserDetailsManager userDetailsManager(){
+    public UserDetailsManager userDetailsManager(DataSource dataSource){
 
-        UserDetails ash = User.builder()
-                .username("ashish")
-                .password("{noop}test123")
-                .roles("EMPLOYEE")
-                .build();
-        UserDetails nik = User.builder()
-                .username("nikku")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER")
-                .build();
-        UserDetails kha = User.builder()
-                .username("khauff")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER", "ADMIN")
-                .build();
+        // for default table as users and authorities table
+//        return new JdbcUserDetailsManager(dataSource);
 
-        return new InMemoryUserDetailsManager(ash, nik, kha);
+        // for customised user and authorities table
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+
+        // define query to retrieve a user by username
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select user_id, password, active from system_users where user_id=?"
+        );
+
+        // define query to retrieve the authorities/roles by username
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
+                "select user_id, role from roles where user_id=?"
+        );
+        return jdbcUserDetailsManager;
     }
 
     @Bean
